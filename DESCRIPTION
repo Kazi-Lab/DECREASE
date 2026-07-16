@@ -1,8 +1,7 @@
 Package: DECREASE
 Title: DECREASE
-Version: 1.0.0.9001
-Authors@R:
-    c(person("Aleksandr", "Ianevski", "aleksandr.ianevski@helsinki.fi", role = c("aut", "cre")))
+Version: 1.0.0.9002
+Authors@R: person("Aleksandr", "Ianevski", , "aleksandr.ianevski@helsinki.fi", role = c("aut", "cre"))
 Description: DECREASE
 License: MIT + file LICENSE
 Encoding: UTF-8
