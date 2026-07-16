@@ -10,7 +10,9 @@ lapply(
     "dplyr",
     "NNLM",
     "modeest",
-    "mlrMBO"
+    "mlrMBO",
+    "lhs",
+    "caret"
   ),
   require,
   character.only = !0
