@@ -1,0 +1,10 @@
+Package: DECREASE
+Title: DECREASE
+Version: 1.0.0.9000
+Authors@R:
+    person("Aleksandr", "Ianevski", "", role = c("aut", "cre"))
+Description: DECREASE
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
