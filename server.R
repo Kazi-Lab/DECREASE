@@ -5,8 +5,6 @@
 # Another orthogonal difficulty is that the HTML elements are named non-descript
 # things like 'toHide2'
 
-# Can probably pull out a make_plot function
-
 make_plot <- function(data, value_var, drug_1_name, drug_2_name) {
   PlotRespMatr(
     reshape2::acast(data, Conc1 ~ Conc2, value.var = value_var),
@@ -23,7 +21,6 @@ shinyServer(function(input, output, session) {
   ########################################    On getstarted click    ########################################
   observeEvent(input$getstarted, {
     showModal(modalDialog(
-      title = "DECREASE",
       fluidRow(
         column(4, fileInput("fileinp", "Upload data")),
         column(
@@ -323,40 +320,13 @@ shinyServer(function(input, output, session) {
     )))
 
     showModal(modalDialog(
-      title = "Choose options",
-
       fluidRow(
-        column(
-          width = 8,
-          offset = 1,
-          selectizeInput(
-            "toExportDrugs",
-            "Choose drug pairs",
-            choices = pairsCalculated_,
-            multiple = T,
-            selected = pairsCalculated_[1:length(pairsCalculated_)],
-            width = "100%"
-          )
-        ),
-        column(
-          width = 2,
-          downloadButton("downloadPDF", label = "Download *.pdf")
-        )
-      ),
-
-      fluidRow(
-        column(
-          2,
-          offset = 1,
-          downloadButton("downloadMatrices", label = "Download (.xlsx)")
-        ),
         column(
           2,
           downloadButton("downloadMatrices2", label = "Download (.csv)")
         ),
         column(
           3,
-          offset = 1,
           selectInput(
             "compatib",
             label = "Compatible with:",
@@ -366,33 +336,6 @@ shinyServer(function(input, output, session) {
         )
       ),
     ))
-
-    output$downloadPDF <- downloadHandler(
-      \() paste0("result_", Sys.Date(), ".pdf"),
-      \(file) {
-        pdf("fileOut.pdf", width = 12)
-        for (k in 1:length(input$toExportDrugs)) {
-          drugs <- unlist(strsplit(input$toExportDrugs[k], " & "))
-          combiK <- annot[annot$Drug1 == drugs[1] & annot$Drug2 == drugs[2], ]
-          combiApprox <- readRDS(
-            paste0(combiK$Drug1[[1]], " & ", combiK$Drug2[[1]], ".RDS")
-          )
-
-          drug_1_name <- data_cell_pair$Drug1[[1]]
-          drug_2_name <- data_cell_pair$Drug2[[1]]
-          combiApprox$Response <- 100 - combiApprox$Response
-          combiApprox$finalpred_ <- 100 - combiApprox$finalpred_
-          gridExtra::grid.arrange(
-            make_plot(combiApprox, "Response", drug_1_name, drug_2_name),
-            make_plot(combiApprox, "finalpred_", drug_1_name, drug_2_name),
-            ncol = 2
-          )
-        }
-        dev.off()
-
-        file.copy("fileOut.pdf", file)
-      },
-    )
 
     # create output compatible with synergyfinder
     synergyMakeFinal <- function() {
@@ -429,14 +372,6 @@ shinyServer(function(input, output, session) {
       "Response",
       "ConcUnit"
     )
-    output$downloadMatrices <- downloadHandler(
-      \() paste0("result_", Sys.Date(), ".xlsx"),
-      \(file) {
-        out <- synergyMakeFinal()
-        openxlsx::write.xlsx(out[, out_cols], "fileOut.xlsx")
-        file.copy("fileOut.xlsx", file)
-      },
-    )
     output$downloadMatrices2 <- downloadHandler(
       \() paste0("result_", Sys.Date(), ".csv"),
       \(file) {
@@ -445,10 +380,5 @@ shinyServer(function(input, output, session) {
         file.copy("fileOut.csv", file)
       }
     )
-  })
-
-  session$onSessionEnded(\() {
-    stopApp()
-    quit("no")
   })
 })
