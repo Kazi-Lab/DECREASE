@@ -273,10 +273,6 @@ shinyServer(function(input, output, session) {
             selected = pairsCalculated_[1:length(pairsCalculated_)],
             width = "100%"
           )
-        ),
-        column(
-          width = 2,
-          downloadButton("downloadPDF", label = "Download *.pdf")
         )
       ),
 
