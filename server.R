@@ -263,6 +263,25 @@ shinyServer(function(input, output, session) {
     showModal(modalDialog(
       fluidRow(
         column(
+          width = 8,
+          offset = 1,
+          selectizeInput(
+            "toExportDrugs",
+            "Choose drug pairs",
+            choices = pairsCalculated_,
+            multiple = T,
+            selected = pairsCalculated_[1:length(pairsCalculated_)],
+            width = "100%"
+          )
+        ),
+        column(
+          width = 2,
+          downloadButton("downloadPDF", label = "Download *.pdf")
+        )
+      ),
+
+      fluidRow(
+        column(
           2,
           downloadButton("downloadMatrices2", label = "Download (.csv)")
         ),
