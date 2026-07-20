@@ -28,7 +28,7 @@ shinyServer(function(input, output, session) {
           selectInput(
             "fileType",
             "Input file format",
-            choices = c("Tabular", "Matrix")
+            choices = c("Tabular")
           )
         ),
         column(
@@ -189,109 +189,50 @@ shinyServer(function(input, output, session) {
   observeEvent(input$fileinp, {
     # Check that data object exists and is data frame.
     if (!is.null(input$fileinp$name)) {
-      if (tools::file_ext(input$fileinp$name) %in% c("xlsx", "txt", "csv")) {
-        # source file load functions
-        source("getData.R")
-        saveRDS(tools::file_ext(input$fileinp$name), "input$fileType")
+      # source file load functions
+      source("getData.R")
+      saveRDS(tools::file_ext(input$fileinp$name), "input$fileType")
 
-        if (
-          input$fileType == "Tabular" &&
-            tools::file_ext(input$fileinp$name) %in% c("txt", "csv", "xlsx")
-        ) {
-          if (tools::file_ext(input$fileinp$name) == 'xlsx') {
-            annot <<- openxlsx::read.xlsx(input$fileinp$datapath)
-          } else if (tools::file_ext(input$fileinp$name) %in% c("txt", "csv")) {
-            annot <<- read.table(
-              file = input$fileinp$datapath,
-              header = T,
-              sep = ",",
-              row.names = NULL,
-              fill = T
-            )
-          }
+      annot <<- read.table(
+        file = input$fileinp$datapath,
+        header = T,
+        sep = ",",
+        row.names = NULL,
+        fill = T
+      )
 
-          # take care of NA's and empty rows/cols
-          annot <<- data.frame(lapply(annot, as.character))
-          annot <<- annot[!apply(is.na(annot) | annot == "", 1, all), ] # rows with all NA
-          annot <<- annot[, !apply(is.na(annot) | annot == "", 2, all)] # cols with all NA
-          annot$Conc1 = as.numeric(as.character(annot$Conc1))
-          annot$Conc2 = as.numeric(as.character(annot$Conc2))
-          annot$Response = as.numeric(as.character(annot$Response))
-        } else if (
-          input$fileType == "Matrix" &&
-            tools::file_ext(input$fileinp$name) %in% c("txt", "csv", "xlsx")
-        ) {
-          if (tools::file_ext(input$fileinp$name) == 'xlsx') {
-            annot <<- openxlsx::read.xlsx(
-              input$fileinp$datapath,
-              colNames = F
-            )
-          } else if (tools::file_ext(input$fileinp$name) %in% c("txt", "csv")) {
-            annot <<- read.table(
-              file = input$fileinp$datapath,
-              header = F,
-              sep = ",",
-              row.names = NULL,
-              fill = T
-            )
-          }
+      # take care of NA's and empty rows/cols
+      annot <<- data.frame(lapply(annot, as.character))
+      annot <<- annot[!apply(is.na(annot) | annot == "", 1, all), ] # rows with all NA
+      annot <<- annot[, !apply(is.na(annot) | annot == "", 2, all)] # cols with all NA
+      annot$Conc1 = as.numeric(as.character(annot$Conc1))
+      annot$Conc2 = as.numeric(as.character(annot$Conc2))
+      annot$Response = as.numeric(as.character(annot$Response))
+      enable("start")
+      annot$Conc1 <<- as.numeric(annot$Conc1)
+      annot$Conc2 <<- as.numeric(annot$Conc2)
+      annot$Response <<- as.numeric(annot$Response)
 
-          # take care of NA's and empty rows/cols
-          annot <<- data.frame(lapply(annot, as.character))
-          annot <<- annot[!apply(is.na(annot) | annot == "", 1, all), ] # rows with all NA
-          annot <<- annot[, !apply(is.na(annot) | annot == "", 2, all)] # cols with all NA
+      # convert to viability
+      if (input$phenotypicResponse == "% cell inhibition") {
+        annot$Response <<- 100 - annot$Response
+      }
 
-          D1 = sum(grepl("Drug1", annot[, 1]))
-          d1_ <- grep("Drug1", annot[, 1])
-          annot <<- do.call(
-            "rbind",
-            lapply(1:D1, function(i) {
-              if (i == D1) {
-                annotComb <- annot[d1_[i]:nrow(annot), ]
-              } else {
-                annotComb <- annot[d1_[i]:(d1_[i + 1] - 1), ]
-              }
-              Matr = annotComb[4:nrow(annotComb), ]
-              colnames(Matr) = Matr[1, ]
-              Matr = Matr[-1, ]
-              rownames(Matr) = Matr[, 1]
-              Matr = Matr[, -1]
-              Reshaped = na.omit(reshape2::melt(data.matrix(Matr)))
-              colnames(Reshaped) = c("Conc1", "Conc2", "Response")
-              Reshaped$ConcUnit = annotComb[3, 2]
-              Reshaped$Drug1 = annotComb[1, 2]
-              Reshaped$Drug2 = annotComb[2, 2]
-              Reshaped$PairIndex = i
-              Reshaped
-            })
-          )
-        }
-        enable("start")
-        annot$Conc1 <<- as.numeric(annot$Conc1)
-        annot$Conc2 <<- as.numeric(annot$Conc2)
-        annot$Response <<- as.numeric(annot$Response)
-
-        # convert to viability
-        if (input$phenotypicResponse == "% cell inhibition") {
-          annot$Response <<- 100 - annot$Response
-        }
-
-        # check whether enable export button
-        if (
-          any(sapply(1:length(unique(annot$PairIndex)), function(k) {
-            combiK <- annot[
-              annot$PairIndex == unique(annot$PairIndex)[[k]],
-            ]
-            file.exists(paste0(
-              combiK$Drug1[[1]],
-              " & ",
-              combiK$Drug2[[1]],
-              ".RDS"
-            ))
-          }))
-        ) {
-          enable("save_results")
-        }
+      # check whether enable export button
+      if (
+        any(sapply(1:length(unique(annot$PairIndex)), function(k) {
+          combiK <- annot[
+            annot$PairIndex == unique(annot$PairIndex)[[k]],
+          ]
+          file.exists(paste0(
+            combiK$Drug1[[1]],
+            " & ",
+            combiK$Drug2[[1]],
+            ".RDS"
+          ))
+        }))
+      ) {
+        enable("save_results")
       }
     }
   })
