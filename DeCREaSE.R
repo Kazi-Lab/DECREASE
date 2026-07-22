@@ -24,7 +24,6 @@ outlier_remove <- function(xTmp, iqr_ = 1.5) {
   xTmp < (qq[1] - outlier_detector) | xTmp > (qq[2] + outlier_detector)
 }
 
-
 # fit single agent dose-response curve
 CALC_IC50_EC50_DSS <- function(
   xpr_tbl,
@@ -182,7 +181,8 @@ CALC_IC50_EC50_DSS <- function(
       tryCatch(
         {
           nls(
-            inhibition ~ MIN +
+            inhibition ~
+              MIN +
               (MAX - MIN) / (1 + (10^(SLOPE * (IC50 - logconc)))),
             data = mat_tbl,
             algorithm = "port",
@@ -209,7 +209,8 @@ CALC_IC50_EC50_DSS <- function(
         },
         error = function(e) {
           minpack.lm::nlsLM(
-            inhibition ~ MIN +
+            inhibition ~
+              MIN +
               (MAX - MIN) / (1 + (10^(SLOPE * (IC50 - logconc)))),
             data = mat_tbl,
             start = list(
@@ -239,7 +240,8 @@ CALC_IC50_EC50_DSS <- function(
     nls_result_ic50_2 <- tryCatch(
       {
         nls(
-          inhibition ~ MIN +
+          inhibition ~
+            MIN +
             (MAX - MIN) / (1 + (10^(SLOPE * (IC50 - logconc)))),
           data = mat_tbl,
           algorithm = "port",
@@ -320,7 +322,8 @@ CALC_IC50_EC50_DSS <- function(
         coef_estim["IC50"] <- min(mat_tbl$logconc, na.rm = T)
       }
       nls_result_ic50 <- nls(
-        inhibition ~ MIN +
+        inhibition ~
+          MIN +
           (MAX - MIN) / (1 + (10^(SLOPE * (IC50 - logconc)))),
         data = mat_tbl,
         algorithm = "port",
@@ -387,13 +390,17 @@ CALC_IC50_EC50_DSS <- function(
     )
     x <- seq(min(mat_tbl$logconc), max(mat_tbl$logconc), length = 100)
     yic <- predict(nls_result_ic50, data.frame(logconc = x))
-    perInh <- t(matrix(
-      mat_tbl[, "inhibition"],
-      dimnames = list(paste0(
-        rep("D", length(mat_tbl[, "inhibition"])),
-        1:length(mat_tbl[, "inhibition"])
-      ))
-    ))
+    perInh <- t(
+      matrix(
+        mat_tbl[, "inhibition"],
+        dimnames = list(
+          paste0(
+            rep("D", length(mat_tbl[, "inhibition"])),
+            1:length(mat_tbl[, "inhibition"])
+          )
+        )
+      )
+    )
     coef_tec50 <- coef_ic50
     coef_tec50["IC50"] <- ifelse(
       coef_tec50["MAX"] > 25,
@@ -668,12 +675,16 @@ obj.fun.err <- function(x) {
       testData <- data_cell_Training[flds[[k]], ]
       trainData <- data_cell_Training[-flds[[k]], ]
       fit <- xgboost(
-        data = data.matrix(trainData[, c(
-          "R1",
-          "R2",
-          "Conc1",
-          "Conc2"
-        )]),
+        data = data.matrix(
+          trainData[,
+            c(
+              "R1",
+              "R2",
+              "Conc1",
+              "Conc2"
+            )
+          ]
+        ),
         label = trainData$Response,
         verbose = F,
         nrounds = round(2**logNtree),
@@ -730,10 +741,8 @@ XGBoostpred <- sapply(1:nrow(XGBoostpred), function(i) {
   modeest::venter(XGBoostpred[i, ])
 })
 
-
 # final prediction
 finalpred_ <- (XGBoostpred + cNMFpred) / 2
-
 
 matr_Out$cNMFpred <- cNMFpred
 matr_Out$XGBoostpred <- XGBoostpred
