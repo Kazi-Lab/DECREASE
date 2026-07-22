@@ -1,4 +1,3 @@
-# load packages
 lapply(
   c(
     "scales",
@@ -27,7 +26,7 @@ outlier_remove <- function(xTmp, iqr_ = 1.5) {
 
 
 # fit single agent dose-response curve
-CALC_IC50_EC50_DSS = function(
+CALC_IC50_EC50_DSS <- function(
   xpr_tbl,
   DSS_typ,
   readoutCTX = F,
@@ -38,10 +37,10 @@ CALC_IC50_EC50_DSS = function(
       inhibition = as.numeric(xpr_tbl),
       dose = as.numeric(names(xpr_tbl))
     )
-    mat_tbl$logconc = log10(mat_tbl$dose)
-    mat_tbl$viability = 100 - mat_tbl$inhibition
-    mat_tbl$inhibition2 = mat_tbl$inhibition
-    mat_tbl$viability2 = mat_tbl$viability
+    mat_tbl$logconc <- log10(mat_tbl$dose)
+    mat_tbl$viability <- 100 - mat_tbl$inhibition
+    mat_tbl$inhibition2 <- mat_tbl$inhibition
+    mat_tbl$viability2 <- mat_tbl$viability
     mat_tbl <- mat_tbl[order(mat_tbl[, "dose"]), ]
 
     if (any(duplicated(mat_tbl$inhibition))) {
@@ -127,8 +126,16 @@ CALC_IC50_EC50_DSS = function(
       0
     )
     min_lower <- ifelse(min_lower >= 100, 99, min_lower)
-    coef_estim["MAX"] <- ifelse(coef_estim["MAX"] > 100, 100, coef_estim["MAX"])
-    coef_estim["MAX"] <- ifelse(coef_estim["MAX"] < 0, 100, coef_estim["MAX"])
+    coef_estim["MAX"] <- ifelse(
+      coef_estim["MAX"] > 100,
+      100,
+      coef_estim["MAX"]
+    )
+    coef_estim["MAX"] <- ifelse(
+      coef_estim["MAX"] < 0,
+      100,
+      coef_estim["MAX"]
+    )
     max_lower <- ifelse(
       max(mat_tbl$inhibition, na.rm = T) > 100,
       coef_estim["MAX"],
@@ -155,7 +162,7 @@ CALC_IC50_EC50_DSS = function(
     max_upper <- ifelse(max_upper < 0, coef_estim["MAX"], max_upper)
     max_upper <- ifelse(max_upper > 100, 100, max_upper) #coef_estim["MAX"]
     max_upper <- ifelse(max_lower > max_upper, coef_estim["MAX"], max_upper)
-    mean_inh_last = mean(tail(mat_tbl$inhibition, 2), na.rm = T)
+    mean_inh_last <- mean(tail(mat_tbl$inhibition, 2), na.rm = T)
     if (mean_inh_last < 60) {
       if (mean_inh_last > 25) {
         coef_estim["IC50"] <- mean(mat_tbl$logconc, na.rm = T)
@@ -267,7 +274,7 @@ CALC_IC50_EC50_DSS = function(
 
     tryCatch(
       {
-        aaa = tryCatch(
+        aaa <- tryCatch(
           {
             summary(nls_result_ic50)
           },
@@ -275,7 +282,7 @@ CALC_IC50_EC50_DSS = function(
             summary(nls_result_ic50_2)
           }
         )
-        bbb = tryCatch(
+        bbb <- tryCatch(
           {
             summary(nls_result_ic50_2)
           },
@@ -284,7 +291,7 @@ CALC_IC50_EC50_DSS = function(
           }
         )
 
-        sumIC50 = list(aaa, bbb)
+        sumIC50 <- list(aaa, bbb)
         ic50std_resid <- round(
           sqrt(
             sum((sumIC50[[1]]$residuals)^2) /
@@ -300,8 +307,10 @@ CALC_IC50_EC50_DSS = function(
           1
         )
         # continue with the best
-        switch_ = which.min(c(ic50std_resid, ic50std_resid2))
-        nls_result_ic50 = list(nls_result_ic50, nls_result_ic50_2)[[switch_]]
+        switch_ <- which.min(c(ic50std_resid, ic50std_resid2))
+        nls_result_ic50 <- list(nls_result_ic50, nls_result_ic50_2)[[
+          switch_
+        ]]
       },
       error = function(e) {}
     )
@@ -311,7 +320,8 @@ CALC_IC50_EC50_DSS = function(
         coef_estim["IC50"] <- min(mat_tbl$logconc, na.rm = T)
       }
       nls_result_ic50 <- nls(
-        inhibition ~ MIN + (MAX - MIN) / (1 + (10^(SLOPE * (IC50 - logconc)))),
+        inhibition ~ MIN +
+          (MAX - MIN) / (1 + (10^(SLOPE * (IC50 - logconc)))),
         data = mat_tbl,
         algorithm = "port",
         start = list(
@@ -336,7 +346,7 @@ CALC_IC50_EC50_DSS = function(
       )
     }
     #Calculate the standard error scores
-    sumIC50 = summary(nls_result_ic50)
+    sumIC50 <- summary(nls_result_ic50)
     ic50std_Error <- sumIC50$coefficients["IC50", "Std. Error"]
     ic50std_resid <- round(
       sqrt(sum((sumIC50$residuals)^2) / (length(sumIC50$residuals) - 1)),
@@ -384,7 +394,7 @@ CALC_IC50_EC50_DSS = function(
         1:length(mat_tbl[, "inhibition"])
       ))
     ))
-    coef_tec50 = coef_ic50
+    coef_tec50 <- coef_ic50
     coef_tec50["IC50"] <- ifelse(
       coef_tec50["MAX"] > 25,
       coef_tec50["IC50"],
@@ -396,10 +406,10 @@ CALC_IC50_EC50_DSS = function(
       perViaTox <- perInh
     } else {
       names(coef_tec50) <- c("EC50", "SLOPE", "MAX", "MIN")
-      coef_tec50["SLOPE"] = -1 * coef_tec50["SLOPE"]
-      tmp = coef_tec50["MAX"]
-      coef_tec50["MAX"] = 100 - coef_tec50["MIN"]
-      coef_tec50["MIN"] = 100 - tmp
+      coef_tec50["SLOPE"] <- -1 * coef_tec50["SLOPE"]
+      tmp <- coef_tec50["MAX"]
+      coef_tec50["MAX"] <- 100 - coef_tec50["MIN"]
+      coef_tec50["MIN"] <- 100 - tmp
       ytec <- 100 - yic
       perViaTox <- 100 - perInh
     }
@@ -436,19 +446,19 @@ CALC_IC50_EC50_DSS = function(
 
 data_cell <- readRDS("annot.RDS")
 set.seed(42)
-influentPoint = NULL # for now
-MatrTr = reshape2::acast(data_cell, Conc1 ~ Conc2, value.var = "Response")
+influentPoint <- NULL # for now
+MatrTr <- reshape2::acast(data_cell, Conc1 ~ Conc2, value.var = "Response")
 
 # check [0,0] conc.
 if (MatrTr[1, 1] < max(MatrTr[2, 1], MatrTr[1, 2])) {
-  MatrTr[1, 1] = 100
+  MatrTr[1, 1] <- 100
 }
 
 # calculate Bliss approximation
-MatrTr = 100 - MatrTr
-bliss.mat = MatrTr
-bliss.mat[bliss.mat > 100] = 100
-bliss.mat[bliss.mat < 0] = 0
+MatrTr <- 100 - MatrTr
+bliss.mat <- MatrTr
+bliss.mat[bliss.mat > 100] <- 100
+bliss.mat[bliss.mat < 0] <- 0
 for (k in 2:nrow(bliss.mat)) {
   for (j in 2:ncol(bliss.mat)) {
     bliss.mat[k, j] <- bliss.mat[k, 1] +
@@ -458,24 +468,32 @@ for (k in 2:nrow(bliss.mat)) {
 }
 
 # fit single-agent
-D1Len = MatrTr[, 1]
-names(D1Len)[1] = 1e-6
-D2Len = MatrTr[1, ]
-names(D2Len)[1] = 1e-6
-d1 = tryCatch(
+D1Len <- MatrTr[, 1]
+names(D1Len)[1] <- 1e-6
+D2Len <- MatrTr[1, ]
+names(D2Len)[1] <- 1e-6
+d1 <- tryCatch(
   {
     predict(
-      CALC_IC50_EC50_DSS(D1Len, DSS_typ = 2, drug_name = "")$nls_result_ic50
+      CALC_IC50_EC50_DSS(
+        D1Len,
+        DSS_typ = 2,
+        drug_name = ""
+      )$nls_result_ic50
     )
   },
   error = function(e) {
     D1Len
   }
 )
-d2 = tryCatch(
+d2 <- tryCatch(
   {
     predict(
-      CALC_IC50_EC50_DSS(D2Len, DSS_typ = 2, drug_name = "")$nls_result_ic50
+      CALC_IC50_EC50_DSS(
+        D2Len,
+        DSS_typ = 2,
+        drug_name = ""
+      )$nls_result_ic50
     )
   },
   error = function(e) {
@@ -484,55 +502,59 @@ d2 = tryCatch(
 )
 
 # new fix half curve
-MatrTrCopy = MatrTr
+MatrTrCopy <- MatrTr
 if (fcurve) {
-  MatrTr[, 1] = d1
-  MatrTr[1, ] = d2
+  MatrTr[, 1] <- d1
+  MatrTr[1, ] <- d2
 } else {
-  MatrTr[, 1] = (MatrTr[, 1] + d1) / 2
-  MatrTr[1, ] = (MatrTr[1, ] + d2) / 2
+  MatrTr[, 1] <- (MatrTr[, 1] + d1) / 2
+  MatrTr[1, ] <- (MatrTr[1, ] + d2) / 2
 }
 
 # single-agent deviations
-devD1 = abs(d1 - (MatrTr[, 1]))
-devD2 = abs(d2 - (MatrTr[1, ]))
-dev_ = abs(bliss.mat - MatrTr)
-MatrOutl = matrix(!1, nrow = nrow(MatrTr), ncol = ncol(MatrTr))
+devD1 <- abs(d1 - (MatrTr[, 1]))
+devD2 <- abs(d2 - (MatrTr[1, ]))
+dev_ <- abs(bliss.mat - MatrTr)
+MatrOutl <- matrix(!1, nrow = nrow(MatrTr), ncol = ncol(MatrTr))
 
 # check deviations with Bliss
-MatrOutl[-1, -1] = outlier_remove(
+MatrOutl[-1, -1] <- outlier_remove(
   abs(dev_[-1, -1] - median(dev_[-1, -1], na.rm = T)),
   iqr_ = 5
 ) &
   (dev_[-1, -1] > 25)
-MatrOutl[, 1] = as.logical(colSums(MatrOutl, na.rm = T)) &
+MatrOutl[, 1] <- as.logical(colSums(MatrOutl, na.rm = T)) &
   devD1 > 10 |
   devD1 > 15
-MatrOutl[1, ] = as.logical(rowSums(MatrOutl, na.rm = T)) &
+MatrOutl[1, ] <- as.logical(rowSums(MatrOutl, na.rm = T)) &
   devD2 > 10 |
   devD1 > 15
 
 # remove possible outliers
-MatrOutl[is.na(MatrOutl)] = !1
-MatrTr[MatrOutl] = NA
+MatrOutl[is.na(MatrOutl)] <- !1
+MatrTr[MatrOutl] <- NA
 if (any(MatrOutl)) {
-  influentPoint = T
+  influentPoint <- T
   warning("Possible outliers were removed")
 }
 
-matr_Out = reshape2::melt(100 - MatrTr)
+matr_Out <- reshape2::melt(100 - MatrTr)
 colnames(matr_Out) <- c("Conc1", "Conc2", "Response")
-matr_Out = dplyr::arrange(matr_Out, Conc1, Conc2)
-matr_OutCopy = reshape2::melt(100 - MatrTrCopy)
+matr_Out <- dplyr::arrange(matr_Out, Conc1, Conc2)
+matr_OutCopy <- reshape2::melt(100 - MatrTrCopy)
 colnames(matr_OutCopy) <- c("Conc1", "Conc2", "Response")
-matr_OutCopy = dplyr::arrange(matr_OutCopy, Conc1, Conc2)
+matr_OutCopy <- dplyr::arrange(matr_OutCopy, Conc1, Conc2)
 
 # fill single-agent response columns (check the design section of manuscript)
 matr_Out$R1 <- sapply(1:nrow(matr_Out), function(i) {
-  matr_Out$Response[matr_Out$Conc1 == matr_Out[i, ]$Conc1 & matr_Out$Conc2 == 0]
+  matr_Out$Response[
+    matr_Out$Conc1 == matr_Out[i, ]$Conc1 & matr_Out$Conc2 == 0
+  ]
 })
 matr_Out$R2 <- sapply(1:nrow(matr_Out), function(i) {
-  matr_Out$Response[matr_Out$Conc2 == matr_Out[i, ]$Conc2 & matr_Out$Conc1 == 0]
+  matr_Out$Response[
+    matr_Out$Conc2 == matr_Out[i, ]$Conc2 & matr_Out$Conc1 == 0
+  ]
 })
 
 # training and test
@@ -544,17 +566,17 @@ data_cell_Test <- matr_Out[testInd, ]
 ######################################################################################################################
 ################################################     fit cNMF      ###################################################
 
-cNMFpred = do.call(
+cNMFpred <- do.call(
   "cbind",
   mclapply(
     1:120,
     function(i) {
-      MatrTr = reshape2::acast(
+      MatrTr <- reshape2::acast(
         rbind(data_cell_Training, data_cell_Test),
         Conc1 ~ Conc2,
         value.var = "Response"
       )
-      MatrTr = MatrTr +
+      MatrTr <- MatrTr +
         matrix(
           runif(1, -0.001, 0.001),
           nrow = nrow(MatrTr),
@@ -563,16 +585,16 @@ cNMFpred = do.call(
 
       if (length(influentPoint) != 0) {
         if (is.na(MatrTr[1, 1])) {
-          MatrTr[1, 1] = 100
+          MatrTr[1, 1] <- 100
         }
         if (is.na(MatrTr[nrow(MatrTr), 1])) {
-          MatrTr[nrow(MatrTr), 1] = MatrTr[nrow(MatrTr) - 1, 1]
+          MatrTr[nrow(MatrTr), 1] <- MatrTr[nrow(MatrTr) - 1, 1]
         }
         if (is.na(MatrTr[1, ncol(MatrTr)])) {
-          MatrTr[1, ncol(MatrTr)] = MatrTr[1, ncol(MatrTr) - 1]
+          MatrTr[1, ncol(MatrTr)] <- MatrTr[1, ncol(MatrTr) - 1]
         }
-        MatrTr[, 1] = zoo::na.approx(MatrTr[, 1], rule = 2)
-        MatrTr[1, ] = zoo::na.approx(MatrTr[1, ], rule = 2)
+        MatrTr[, 1] <- zoo::na.approx(MatrTr[, 1], rule = 2)
+        MatrTr[1, ] <- zoo::na.approx(MatrTr[1, ], rule = 2)
       }
 
       nsclc2.nmf <- NNLM::nnmf(
@@ -587,7 +609,7 @@ cNMFpred = do.call(
       )
       nsclc2.hat.nmf <- with(nsclc2.nmf, W %*% H)
 
-      matr_Out = reshape2::melt(nsclc2.hat.nmf)
+      matr_Out <- reshape2::melt(nsclc2.hat.nmf)
       colnames(matr_Out) <- c("Conc1", "Conc2", "Response")
       dplyr::arrange(matr_Out, Conc1, Conc2)$Response
     },
@@ -597,10 +619,10 @@ cNMFpred = do.call(
 
 # prepare predictions
 if (sum(colSums(cNMFpred == 0) == 0) > 1) {
-  cNMFpred = cNMFpred[, colSums(cNMFpred == 0) == 0]
+  cNMFpred <- cNMFpred[, colSums(cNMFpred == 0) == 0]
 }
 
-cNMFpred = sapply(1:nrow(cNMFpred), function(i) modeest::venter(cNMFpred[i, ]))
+cNMFpred <- sapply(1:nrow(cNMFpred), function(i) modeest::venter(cNMFpred[i, ]))
 
 ### parameter set
 gdes <- function() {
@@ -624,14 +646,14 @@ gdes <- function() {
   )
 }
 
-obj.fun.err = function(x) {
-  logNtree = x[1][[1]]
-  lambda = x[2][[1]]
-  alpha = x[3][[1]]
-  maxdepth = x[4][[1]]
-  subsample = x[5][[1]]
-  colsample_bytree = x[6][[1]]
-  eta = x[7][[1]]
+obj.fun.err <- function(x) {
+  logNtree <- x[1][[1]]
+  lambda <- x[2][[1]]
+  alpha <- x[3][[1]]
+  maxdepth <- x[4][[1]]
+  subsample <- x[5][[1]]
+  colsample_bytree <- x[6][[1]]
+  eta <- x[7][[1]]
   MAE_ <- 0
 
   # repeated CV
@@ -645,8 +667,13 @@ obj.fun.err = function(x) {
     for (k in 1:length(flds)) {
       testData <- data_cell_Training[flds[[k]], ]
       trainData <- data_cell_Training[-flds[[k]], ]
-      fit = xgboost(
-        data = data.matrix(trainData[, c("R1", "R2", "Conc1", "Conc2")]),
+      fit <- xgboost(
+        data = data.matrix(trainData[, c(
+          "R1",
+          "R2",
+          "Conc1",
+          "Conc2"
+        )]),
         label = trainData$Response,
         verbose = F,
         nrounds = round(2**logNtree),
@@ -662,7 +689,7 @@ obj.fun.err = function(x) {
         )
       )
 
-      ypred = predict(
+      ypred <- predict(
         fit,
         as.matrix(testData[, c("R1", "R2", "Conc1", "Conc2")])
       )
@@ -673,9 +700,9 @@ obj.fun.err = function(x) {
 }
 des <- gdes()
 gc(T)
-des$y = apply(des, 1, obj.fun.err)
+des$y <- apply(des, 1, obj.fun.err)
 
-models = des[order(des$y), ]
+models <- des[order(des$y), ]
 # Fit with 5 models with best parameters
 XGBoostpred <- do.call(
   "cbind",
@@ -699,24 +726,24 @@ XGBoostpred <- do.call(
     predict(fit, as.matrix(matr_Out[, c("R1", "R2", "Conc1", "Conc2")]))
   })
 )
-XGBoostpred = sapply(1:nrow(XGBoostpred), function(i) {
+XGBoostpred <- sapply(1:nrow(XGBoostpred), function(i) {
   modeest::venter(XGBoostpred[i, ])
 })
 
 
 # final prediction
-finalpred_ = (XGBoostpred + cNMFpred) / 2
+finalpred_ <- (XGBoostpred + cNMFpred) / 2
 
 
-matr_Out$cNMFpred = cNMFpred
-matr_Out$XGBoostpred = XGBoostpred
-matr_Out$finalpred_ = finalpred_
-matr_Out$finalpred_[trainInd] = matr_Out$Response[trainInd]
+matr_Out$cNMFpred <- cNMFpred
+matr_Out$XGBoostpred <- XGBoostpred
+matr_Out$finalpred_ <- finalpred_
+matr_Out$finalpred_[trainInd] <- matr_Out$Response[trainInd]
 if (!fcurve) {
   matr_Out[
     matr_Out$Conc1 == 0 | matr_Out$Conc2 == 0,
     "finalpred_"
-  ] = matr_OutCopy[
+  ] <- matr_OutCopy[
     matr_OutCopy$Conc1 == 0 | matr_OutCopy$Conc2 == 0,
     "Response"
   ]
