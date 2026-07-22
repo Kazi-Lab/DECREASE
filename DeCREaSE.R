@@ -19,15 +19,15 @@ lapply(
 )
 
 # remove outliers
-outlier_remove <- compiler::cmpfun(function(xTmp, iqr_ = 1.5) {
+outlier_remove <- function(xTmp, iqr_ = 1.5) {
   qq <- unname(quantile(xTmp, probs = c(.25, .75), na.rm = T))
   outlier_detector <- iqr_ * IQR(xTmp, na.rm = T)
   xTmp < (qq[1] - outlier_detector) | xTmp > (qq[2] + outlier_detector)
-})
+}
 
 
 # fit single agent dose-response curve
-CALC_IC50_EC50_DSS = compiler::cmpfun(function(
+CALC_IC50_EC50_DSS = function(
   xpr_tbl,
   DSS_typ,
   readoutCTX = F,
@@ -432,7 +432,7 @@ CALC_IC50_EC50_DSS = compiler::cmpfun(function(
 
     return(list(coef_ic50 = coef_ic50, nls_result_ic50 = nls_result_ic50))
   })
-})
+}
 
 data_cell <- readRDS("annot.RDS")
 set.seed(42)
