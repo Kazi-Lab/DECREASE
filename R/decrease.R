@@ -8,9 +8,9 @@
 #' @importFrom rlang .data
 #' @export
 decrease <- function(data, is_viability, use_fitted_single_agent_values) {
-  # TODO: implement is_viability
   set.seed(42)
 
+  # Will turn data into viability, if not already.
   data <- preprocess_data(data, is_viability)
 
   mat <- convert_to_matrix(data)
