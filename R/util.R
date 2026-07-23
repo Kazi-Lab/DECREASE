@@ -1,5 +1,3 @@
-read_data <- function(path) read.csv(path, row.names = NULL)
-
 #' Check data integrity and format for analysis
 #'
 #' This function checks for the presence of columns as well as if they are of

@@ -4,17 +4,16 @@
 \alias{decrease}
 \title{Impute missing values from dose-response experiments}
 \usage{
-decrease(path, is_viability, use_fitted_single_agent_values)
+decrease(data, is_viability, use_fitted_single_agent_values)
 }
 \arguments{
-\item{path}{character path to .csv file containing columns Conc1, Conc2, and
-Response}
+\item{data}{data.frame containing columns Conc1, Conc2, and Response}
 
 \item{is_viability}{boolean. Is the Response column viability? If FALSE,
 converted to viability.}
 
-\item{use_fitted_single_agent_values}{boolean. Should the fitted single-agent values be
-used? If FALSE, use raw values.}
+\item{use_fitted_single_agent_values}{boolean. Should the fitted single-agent
+values be used? If FALSE, use raw values.}
 }
 \description{
 Impute missing values from dose-response experiments
