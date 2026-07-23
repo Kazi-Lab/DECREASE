@@ -19,7 +19,6 @@ Imports:
     lhs,
     minpack.lm,
     modeest,
-    NNLM (>= 0.4.4),
     ParamHelpers,
     reshape2,
     rlang,
