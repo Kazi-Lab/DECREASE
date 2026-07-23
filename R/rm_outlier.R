@@ -15,6 +15,7 @@
 #'
 #' mark_outliers(values, iqrs = 0)
 #' mark_outliers(values, iqrs = 1.5)
+#' @export
 mark_outliers <- function(values, iqrs) {
   quantiles <- quantile(values, probs = c(0.25, 0.75), na.rm = TRUE)
   additional_range <- iqrs * IQR(values, na.rm = TRUE)
