@@ -25,6 +25,7 @@ decrease <- function(data, is_viability, use_fitted_single_agent_values) {
     names(responses)[1] <- 1e-6
     responses <- dplyr::as_tibble(responses, rownames = "dose")
     colnames(responses) <- c("dose", "response")
+    responses$dose <- as.numeric(responses$dose)
     tryCatch(
       stats::predict(fit_dose_response(responses)),
       error = \(x) responses
