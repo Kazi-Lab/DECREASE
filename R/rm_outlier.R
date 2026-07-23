@@ -24,7 +24,10 @@ mark_outliers <- function(values, iqrs) {
   values < ll | values > ul
 }
 
-detect_outliers <- function(mat, fcurve, d1, d2) {
+detect_outliers <- function(mat, fcurve, fit_1, fit_2) {
+  d1 <- fit_1$response
+  d2 <- fit_2$response
+
   bliss_mat <- calculate_bliss(mat)
 
   if (fcurve) {
