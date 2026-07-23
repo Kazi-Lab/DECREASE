@@ -19,5 +19,5 @@ Create Bliss independence matrix from dose-response matrix
 Values are limited between 0 and 100 before calculations are made
 }
 \examples{
-rnorm(25, mean = 50, sd = 50, 5, 5) |> calculate_bliss()
+rnorm(25, mean = 50, sd = 50) |> matrix(5, 5) |> calculate_bliss()
 }

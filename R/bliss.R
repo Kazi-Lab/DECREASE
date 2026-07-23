@@ -4,7 +4,7 @@
 #'
 #' @param mat A dose response matrix, where values are % inhibition
 #' @returns A Bliss independence matrix, where values are % inhibition
-#' @examples rnorm(25, mean = 50, sd = 50, 5, 5) |> calculate_bliss()
+#' @examples rnorm(25, mean = 50, sd = 50) |> matrix(5, 5) |> calculate_bliss()
 #' @export
 calculate_bliss <- function(mat) {
   # Limit between 0 and 100
