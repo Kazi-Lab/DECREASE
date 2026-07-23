@@ -34,7 +34,8 @@ decrease <- function(data, is_viability, use_fitted_single_agent_values) {
     get_fitted_responses(mat[1, ])
   )
 
-  if (any(outliers, na.rm = TRUE)) {
+  has_outliers <- any(outliers, na.rm = TRUE)
+  if (has_outliers) {
     warning("Possible outliers were removed")
   }
 
@@ -55,7 +56,7 @@ decrease <- function(data, is_viability, use_fitted_single_agent_values) {
   )
 
   trainInd <- which(!is.na(out$Response))
-  out$cNMFpred <- fit_cnmf(out, influentPoint)
+  out$cNMFpred <- fit_cnmf(out, has_outliers)
   out$XGBoostpred <- fit_xgboost(out)
   out$finalpred_ <- (out$XGBoostpred + out$cNMFpred) / 2
   out$finalpred_[trainInd] <- out$Response[trainInd]
