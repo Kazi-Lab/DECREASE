@@ -1,10 +1,13 @@
+#' Impute missing values from dose-response experiments
+#'
 #' @param path character path to .csv file containing columns Conc1, Conc2, and
 #'   Response
 #' @param is_viability boolean. Is the Response column viability? If FALSE,
 #'   converted to viability.
 #' @param use_fitted_single_agent_values boolean. Should the fitted single-agent values be
 #'   used? If FALSE, use raw values.
-dc <- function(path, is_viability, use_fitted_single_agent_values) {
+#' @export
+decrease <- function(path, is_viability, use_fitted_single_agent_values) {
   # TODO: implement is_viability
   set.seed(42)
 

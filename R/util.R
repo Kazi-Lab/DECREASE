@@ -43,7 +43,11 @@ make_0_drug_highest <- function(mat) {
   mat
 }
 
+#' Convert dose-response data.frame into a matrix
+#'
 #' @param df data.frame with Conc1, Conc2, and Response
 convert_to_matrix <- function(df) {
+  # This function exists largely so if I decide to drop reshape2 and use dplyr
+  # instead, I don't have to go hunting as much.
   reshape2::acast(df, Conc1 ~ Conc2, value.var = "Response")
 }
