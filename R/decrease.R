@@ -27,6 +27,8 @@ decrease <- function(data, is_viability, use_fitted_single_agent_values) {
     colnames(responses) <- c("dose", "response")
     tryCatch(
       stats::predict(fit_dose_response(responses)),
+      error = \(x) responses
+    )
   }
 
   outliers <- detect_outliers(
