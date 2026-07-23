@@ -17,8 +17,8 @@
 #' mark_outliers(values, iqrs = 1.5)
 #' @export
 mark_outliers <- function(values, iqrs) {
-  quantiles <- quantile(values, probs = c(0.25, 0.75), na.rm = TRUE)
-  additional_range <- iqrs * IQR(values, na.rm = TRUE)
+  quantiles <- stats::quantile(values, probs = c(0.25, 0.75), na.rm = TRUE)
+  additional_range <- iqrs * stats::IQR(values, na.rm = TRUE)
   ll <- quantiles[1] - additional_range
   ul <- quantiles[2] + additional_range
   values < ll | values > ul
@@ -42,8 +42,8 @@ detect_outliers <- function(mat, fcurve, d1, d2) {
 
   # check deviations with Bliss
   outliers[-1, -1] <- mark_outliers(
-    abs(dev[-1, -1] - median(dev[-1, -1], na.rm = TRUE)),
-    iqr_ = 5
+    abs(dev[-1, -1] - stats::median(dev[-1, -1], na.rm = TRUE)),
+    5
   ) &
     (dev[-1, -1] > 25)
 

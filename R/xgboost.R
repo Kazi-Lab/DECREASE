@@ -92,7 +92,7 @@ fit_xgboost <- function(data) {
           )
         )
 
-        ypred <- predict(
+        ypred <- stats::predict(
           fit,
           as.matrix(testData[, c("R1", "R2", "Conc1", "Conc2")])
         )
@@ -126,7 +126,7 @@ fit_xgboost <- function(data) {
           colsample_bytree = models[i, "colsample_bytree"]
         )
       )
-      predict(fit, as.matrix(data[, c("R1", "R2", "Conc1", "Conc2")]))
+      stats::predict(fit, as.matrix(data[, c("R1", "R2", "Conc1", "Conc2")]))
     })
   )
   XGBoostpred <- sapply(

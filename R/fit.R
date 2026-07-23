@@ -7,7 +7,7 @@ fit_dose_response <- function(data) {
 
   estimated_parameters <- estimate_parameters(data)
 
-  coef_estim <- coef(estimated_parameters)
+  coef_estim <- stats::coef(estimated_parameters)
   names(coef_estim) <- c("SLOPE", "MIN", "MAX", "IC50")
 
   cleaned_parameters <- clean_parameters(coef_estim, data)
@@ -33,7 +33,7 @@ drc_fit_with_fn <- function(data, fn, names, errorm = TRUE) {
     data = data,
     fct = fn(names = names),
     logDose = 10,
-    drmc(errorm = errorm)
+    drc::drmc(errorm = errorm)
   )
 }
 
@@ -118,7 +118,7 @@ clean_parameters <- function(p, data) {
     max_upper <- p$MAX
   }
 
-  mean_resp_last <- mean(tail(data$response, 2), na.rm = TRUE)
+  mean_resp_last <- mean(utils::tail(data$response, 2), na.rm = TRUE)
   if (mean_resp_last < 25) {
     p$IC50 <- max_log_dose
   } else if (mean_resp_last < 60) {
@@ -156,7 +156,7 @@ nls_fit <- function(data, cleaned_parameters) {
   )
 
   ic50_median_dose_start <- start
-  ic50_median_dose_start[["IC50"]] <- median(data$log_dose)
+  ic50_median_dose_start[["IC50"]] <- stats::median(data$log_dose)
 
   lower <- c(SLOPE = 0, MIN = 0, MAX = max_lower, IC50 = min(data$log_dose))
   upper <- c(SLOPE = 4, MIN = 0, MAX = 100, IC50 = max(data$log_dose))
@@ -165,7 +165,15 @@ nls_fit <- function(data, cleaned_parameters) {
   control <- list(warnOnly = TRUE, minFactor = 1 / 2048)
   fit_1 <- tryCatch(
     {
-      nls(form, data, start, control, "port", lower = lower, upper = upper)
+      stats::nls(
+        form,
+        data,
+        start,
+        control,
+        "port",
+        lower = lower,
+        upper = upper
+      )
     },
     error = \(e) {
       minpack.lm::nlsLM(form, data, start, lower = lower, upper = upper)
@@ -173,7 +181,7 @@ nls_fit <- function(data, cleaned_parameters) {
   )
 
   fit_2 <- tryCatch({
-    nls(
+    stats::nls(
       form,
       data,
       ic50_median_dose_start,
@@ -187,7 +195,7 @@ nls_fit <- function(data, cleaned_parameters) {
   best_fit <- choose_best_fit(fit_1, fit_2)
 
   # In the case of a shallow slope, fit again with additional constraints
-  if (coef(best_fit)["SLOPE"] <= 0.2) {
+  if (stats::coef(best_fit)["SLOPE"] <= 0.2) {
     new_start <- start
     if (cleaned_parameters$mean_resp_last > 60) {
       new_start[["IC50"]] <- min(data$log_dose, na.rm = TRUE)
@@ -201,7 +209,7 @@ nls_fit <- function(data, cleaned_parameters) {
     new_upper[["SLOPE"]] <- 2.5
     new_upper[["MAX"]] <- max_upper
 
-    best_fit <- nls(
+    best_fit <- stats::nls(
       form,
       data,
       start,
@@ -236,7 +244,7 @@ choose_best_fit <- function(fit_1, fit_2) {
   }
 
   # Otherwise, return which ever has the lowest residuals
-  if (sd(residuals(fit_1)) < sd(residuals(fit_2))) {
+  if (stats::sd(stats::residuals(fit_1)) < stats::sd(stats::residuals(fit_2))) {
     return(fit_1)
   }
   return(fit_2)

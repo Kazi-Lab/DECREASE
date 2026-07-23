@@ -2,7 +2,8 @@ Package: DECREASE
 Title: DECREASE
 Version: 1.0.0.9002
 Authors@R: person("Aleksandr", "Ianevski", , "aleksandr.ianevski@helsinki.fi", role = c("aut", "cre"))
-Description: DECREASE
+Description: DECREASE imputes missing dose combinations from synergy experiments
+    using an average of XGBoost and non-negative matrix factorization.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -10,3 +11,19 @@ Depends:
     R (>= 4.1.0)
 Config/roxygen2/version: 8.0.0
 LazyData: true
+Imports: 
+    caret,
+    caTools,
+    dplyr,
+    drc,
+    lhs,
+    minpack.lm,
+    modeest,
+    NNLM (>= 0.4.4),
+    ParamHelpers,
+    reshape2,
+    rlang,
+    xgboost,
+    zoo
+Remotes:  
+    linxihui/NNLM

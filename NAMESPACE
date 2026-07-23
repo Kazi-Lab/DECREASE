@@ -3,3 +3,4 @@
 export(calculate_bliss)
 export(decrease)
 export(mark_outliers)
+importFrom(rlang,.data)

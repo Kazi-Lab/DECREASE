@@ -23,7 +23,7 @@ fit_cnmf <- function(data, has_outliers) {
         )
         MatrTr <- MatrTr +
           matrix(
-            runif(1, -0.001, 0.001),
+            stats::runif(1, -0.001, 0.001),
             nrow = nrow(MatrTr),
             ncol = ncol(MatrTr)
           )

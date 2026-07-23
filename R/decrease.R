@@ -5,6 +5,7 @@
 #'   converted to viability.
 #' @param use_fitted_single_agent_values boolean. Should the fitted single-agent
 #'   values be used? If FALSE, use raw values.
+#' @importFrom rlang .data
 #' @export
 decrease <- function(data, is_viability, use_fitted_single_agent_values) {
   # TODO: implement is_viability
@@ -24,7 +25,8 @@ decrease <- function(data, is_viability, use_fitted_single_agent_values) {
     names(responses)[1] <- 1e-6
     responses <- dplyr::as_tibble(responses, rownames = "dose")
     colnames(responses) <- c("dose", "response")
-    tryCatch(predict(fit_dose_responses(responses)), \(x) responses)
+    tryCatch(
+      stats::predict(fit_dose_response(responses)),
   }
 
   outliers <- detect_outliers(
@@ -42,7 +44,7 @@ decrease <- function(data, is_viability, use_fitted_single_agent_values) {
   # LOOK OUT! out is viability now
   out <- reshape2::melt(100 - mat)
   colnames(out) <- c("Conc1", "Conc2", "Response")
-  out <- dplyr::arrange(out, Conc1, Conc2)
+  out <- dplyr::arrange(out, .data$Conc1, .data$Conc2)
   og <- out
 
   # fill single-agent response columns (check the design section of manuscript)
