@@ -33,7 +33,7 @@ drc_fit_with_fn <- function(data, fn, names, errorm = TRUE) {
     data = data,
     fct = fn(names = names),
     logDose = 10,
-    drc::drmc(errorm = errorm)
+    control = drc::drmc(errorm = errorm)
   )
 }
 
