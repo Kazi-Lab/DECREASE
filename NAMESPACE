@@ -2,5 +2,6 @@
 
 export(calculate_bliss)
 export(decrease)
+export(fit_dose_response)
 export(mark_outliers)
 importFrom(rlang,.data)

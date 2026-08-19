@@ -1,4 +1,15 @@
-# data: A data.frame with numeric columns named 'dose' and 'response'
+#' Fit dose response data
+#'
+#' @details Broadly, this function:
+#' 1. Converts dose into log10 dose
+#' 2. Attempts a few preliminary fits to get good starting parameters
+#' 3. Checks if parameters seem unrealistic and nudges them accordingly
+#' 4. Does a final fit with these parameters
+#'
+#' @param data data.frame. Has two columns:
+#' * dose: numeric, contains untransformed doses
+#' * response: numeric, contains responses as inhibition
+#' @export
 fit_dose_response <- function(data) {
   data$log_dose <- log10(data$dose)
   data <- data[order(data$dose), ]
@@ -15,6 +26,21 @@ fit_dose_response <- function(data) {
   nls_fit(data, cleaned_parameters)
 }
 
+#' Break response ties
+#'
+#' If there are any ties, breaks them by adding an escalating 0.01 to EVERY
+#' response
+#'
+#' @inheritParams fit_dose_response
+#'
+#' @returns input with responses broken, if any
+#'
+#' @examples
+#' no_ties <- data.frame(dose = 1:3, response = 1:3)
+#' break_response_ties(no_ties)
+#'
+#' ties <- data.frame(dose = 1:3, response = c(1, 1, 3))
+#' break_response_ties(ties)
 break_response_ties <- function(data) {
   if (any(duplicated(data$response))) {
     data$response <- seq(
@@ -37,6 +63,14 @@ drc_fit_with_fn <- function(data, fn, names, errorm = TRUE) {
   )
 }
 
+#' Try to fit data to get initial parameters
+#'
+#' Will attempt with log-logistic drc::LL.4. If fail or warn, falls back to
+#' drc::L.4.
+#'
+#' @inheritParams fit_dose_response
+#'
+#' @returns a object of class `drc`
 estimate_parameters <- function(x) {
   names <- c("SLOPE", "MIN", "MAX", "IC50")
   tryCatch(
@@ -46,11 +80,17 @@ estimate_parameters <- function(x) {
   )
 }
 
-# p = parameters
-#
-# I know it's frowned upon to abbreviate variables, but less text makes it less
-# scary to look at
+#' Detect and nudge suspicious looking parameters
+#'
+#' @inheritParams fit_dose_response
+#'
+#' @param p A named vector of coefficients of a fit, with names "SLOPE", "MIN",
+#'   "MAX", and "IC50"
 clean_parameters <- function(p, data) {
+  # p = parameters
+  #
+  # I know it's frowned upon to abbreviate variables, but less text makes it less
+  # scary to look at
   max_dose <- max(data$dose, na.rm = TRUE)
   min_dose <- min(data$dose, na.rm = TRUE)
   max_response <- max(data$response, na.rm = TRUE)
@@ -140,6 +180,15 @@ clean_parameters <- function(p, data) {
   )
 }
 
+#' Fit dose response data with best-guess starting parameters
+#'
+#' @inheritParams fit_dose_response
+#'
+#' @param cleaned_parameters list containing:
+#' * params: a named vector of fit coefficients
+#' * max_lower, min lower, and max_upper: additional constrains to provide nls
+#' if slope is shallow
+#' @returns nls fit
 nls_fit <- function(data, cleaned_parameters) {
   coef_estim <- cleaned_parameters$params
   max_lower <- cleaned_parameters$max_lower
