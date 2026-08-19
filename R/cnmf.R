@@ -6,6 +6,19 @@
 # which is found (in a roundabout way) using outlier_remove
 #
 # This argument has been renamed to be 'has outliers'
+
+#' Impute outliers using consensus non-negative matrix factorization.
+#'
+#' @details Consensus is taken using venter mode of 120 rounds of estimation
+#'
+#' @param data data.frame that has, minimally:
+#' * Response: numeric column that contains responses as viability
+#' * Conc1, Conc2: Columns containing concentrations of drug 1 and 2
+#'
+#' @param has_outliers boolean which denotes if the data has outliers, as
+#'   determined by detect_outliers.
+#'
+#' @returns numeric vector of imputed responses
 fit_cnmf <- function(data, has_outliers) {
   trainInd <- which(!is.na(data$Response))
   testInd <- which(is.na(data$Response))
